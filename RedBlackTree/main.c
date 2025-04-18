@@ -6,22 +6,25 @@ int main(){
     char op;
     int num;
 
-    //criar raiz
+    /*Criar raiz*/
     scanf(" %c %d", &op, &num);
-    struct no_t *r = cria_no(num);
+    struct tree_t *t = cria_arvore(num);
+
+    /*Caso não crie a raiz*/
+    if(t == NULL){
+        return 1;
+    }
 
     while(scanf(" %c %d", &op, &num) != EOF){
         if(op == 'i'){
-            inserir(r, num);
+            inserir(t, num);
         } else if (op == 'r') {
-            //retirar
+            remover(t, num);
         }
     }
 
-    print_em_ordem(r);
-    
-
-    //destruir arvore
+    print_em_ordem(t->root);
+    destroi(t);
 
     return 0;
 }
