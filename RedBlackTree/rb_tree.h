@@ -11,19 +11,17 @@ struct no_t {
     struct no_t *pai;
 };
 
-struct no_t *cria_no(int chave);
-void inserir(struct no_t *r, int chave);
-struct no_t *busca(struct no_t *r, int chave);
-void inserir_fix(struct no_t **r, struct no_t *novo);
-//inserir para consertar
-    
-//remover
+struct tree_t{
+    struct no_t *root;
+};
 
-//remover para consertar
-    //rotacao para dir e esq
-    //achar antecessor
-void print_em_ordem(struct no_t *r);
-void destroi_arvore(struct no_t *r);
+struct tree_t *cria_arvore(int chave);
+struct no_t *cria_no(int chave);
+void inserir(struct tree_t *t, int chave);
+void remover(struct tree_t *t, int chave);
+void print_em_ordem(struct tree_t *t);
+void destroi(struct tree_t *t);
+
 
 
 #endif 

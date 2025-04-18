@@ -5,6 +5,7 @@
 #define BLACK 0
 #define RED 1
 
+
 struct no_t *cria_no(int chave){
     struct no_t *n;
 
@@ -13,28 +14,46 @@ struct no_t *cria_no(int chave){
     n->cor = RED;
     n->dir = NULL;
     n->esq = NULL;
-    n->pai = NULL;
     n->chave = chave;
 
     return n;
 }
 
-struct no_t *busca(struct no_t *r, int chave){
-    //chave não existe
-    if(!r)
+struct tree_t *cria_arvore(int chave){
+    struct tree_t *t;
+
+    if(!(t = malloc(sizeof(struct tree_t))))
         return NULL;
 
-    if(chave == r->chave)
-        return r;
+    t = cria_no(chave);
 
-    if(chave < r->chave)
-        return busca(r->esq, chave);
-    
-    return busca(r->dir, chave);
+    if (t->root == NULL) {
+        free(t);
+        return NULL;
+    }
+
+    t->root->cor = BLACK;
+    t->root->pai = NULL;
+
+    return t;
 }
 
+void destroi_no(struct no_t *n){
+    if(n != NULL){
+        destroi_no(n->esq);
+        destroi_no(n->dir);
+        free(n);
+    }
+}
 
-void rot_esq(struct no_t **r, struct no_t *x){
+void destroi(struct tree_t *t){
+    if(t != NULL){
+        destroi_no(t->root);
+        free(t);
+    }
+}
+
+void rot_esq(struct tree_t *t, struct no_t *x){
     struct no_t *y;
     y = x->dir; 
     x->dir = y->esq; 
@@ -46,7 +65,7 @@ void rot_esq(struct no_t **r, struct no_t *x){
 
     //se x for a raiz
     if(x->pai == NULL)
-        *r = y; //y passa a ser a raiz
+        t->root = y; //y passa a ser a raiz
     else if(x == x->pai->esq)
         x->pai->esq = y; 
     
@@ -57,7 +76,7 @@ void rot_esq(struct no_t **r, struct no_t *x){
     x->pai = y;
 }
 
-void rot_dir(struct no_t **r, struct no_t *x){
+void rot_dir(struct tree_t *t, struct no_t *x){
     struct no_t *y;
 
     y = x->esq;
@@ -69,7 +88,7 @@ void rot_dir(struct no_t **r, struct no_t *x){
     y->pai = x->pai;
 
     if(x->pai == NULL)
-        *r = y; //y passa a ser a raiz
+        t->root = y; //y passa a ser a raiz
     else if(x == x->pai->esq)
         x->pai->esq = y;
     else
@@ -79,10 +98,11 @@ void rot_dir(struct no_t **r, struct no_t *x){
     x->pai = y;
 }
 
+
 //Inserção: 
     // Inserir primeiro e depois consertar
 
-void inserir_fix(struct no_t *r, struct no_t *aux){
+void inserir_fixup(struct tree_t *t, struct no_t *aux){
     //seguir regra: nó pai de um nó vermelho é preto
     // se aux não é NULL
     while(aux->pai != NULL && aux->pai->cor == RED){ 
@@ -104,13 +124,13 @@ void inserir_fix(struct no_t *r, struct no_t *aux){
                 if (aux == aux->pai->dir){
                 //Caso 2
                 aux = aux->pai;
-                rot_esq(r, aux);
+                rot_esq(t, aux);
                 } 
                 //Caso 3**
                 aux->pai->cor = BLACK;
                 aux->pai->pai->cor = RED;
                 //rotação entre pai e avô
-                rot_dir(r, aux->pai->pai);
+                rot_dir(t, aux->pai->pai);
             }
         //outro lado     
         } else {
@@ -127,22 +147,23 @@ void inserir_fix(struct no_t *r, struct no_t *aux){
                 if(aux == aux->pai->esq){
                     //Caso 2
                     aux = aux->pai;
-                    rot_dir(r, aux);
+                    rot_dir(t, aux);
                 }
                 //Caso 3
                 aux->pai->cor = BLACK;
                 aux->pai->pai->cor = RED;
-                rot_esq(r, aux->pai->pai);
+                rot_esq(t, aux->pai->pai);
             }
         }
     }
     //raiz sempre é preta, trata tanto colocar o primeiro nó (raiz) quanto o consertar
-    r->cor = BLACK;
+    t->root->cor = BLACK;
 }
 
-void inserir(struct no_t *r, int chave){
+
+void inserir(struct tree_t *t, int chave){
     struct no_t *pai, *novo;
-    novo = r;
+    novo = t->root;
 
     //achar onde inserir
     while(novo != NULL){
@@ -166,17 +187,166 @@ void inserir(struct no_t *r, int chave){
     novo->pai = pai;
 
     //consertar árvore
-    inserir_fix(r, novo);
+    inserir_fix(t, novo);
 }
 
+/*Remover*/
+    //Remover e depois consertar
 
+struct no_t *busca(struct no_t *r, int chave){
+    //chave não existe
+    if(!r)
+        return NULL;
 
-void print_em_ordem(struct no_t *r){
+    if(chave == r->chave)
+        return r;
+
+    if(chave < r->chave)
+        return busca(r->esq, chave);
+    
+    return busca(r->dir, chave);
+}
+
+struct no_t *tree_max(struct no_t *r){
+    if(r == NULL) return NULL;
+
+    while(r->dir != NULL){
+        r = r->dir;
+    }
+
+    return r; 
+}
+
+void transplant(struct tree_t *t, struct no_t *u, struct no_t *v){
+    //Se u for raiz, substitui por v
+    if(u->pai == NULL)
+        t->root = v;
+    //Se for o filho da esquerda    
+    else if(u == u->pai->esq)
+        u->pai->esq = v; //v será excluido
+    else 
+        u->pai->dir = v;
+    
+    if(v != NULL) //Se v era raiz
+        v->pai = u->pai;
+}
+
+void remover_fixup(struct tree_t *t, struct no_t *x){
+    while(x->pai != NULL && x->cor == BLACK){
+        if(x == x->pai->esq){
+            struct no_t *w = x->pai->dir;
+            //Caso 1
+            if(w->cor == RED){
+                w->cor = BLACK;
+                x->pai->cor = RED;
+                rot_esq(t, x->pai);
+                w = x->pai->dir;
+            }
+            //Caso 2
+            if(w->esq->cor == BLACK && w->dir->cor == BLACK){
+                w->cor = RED;
+                x = x->pai;
+            }
+            //Caso 3
+            else {
+                if(w->dir->cor == BLACK){
+                    w->esq->cor = BLACK;
+                    w->cor = RED;
+                    rot_dir(t, w);
+                    w = x->pai->dir;
+                }
+                //Caso 4
+                w->cor = x->pai->cor;
+                x->pai->cor = BLACK;
+                w->dir->cor = BLACK;
+                rot_esq(t, x->pai);
+                x = t->root;
+            }
+        }
+        else{
+            struct no_t *w = x->pai->esq;
+            //Caso 1
+            if(w->cor == RED){
+                x->cor = BLACK;
+                x->pai->cor = RED;
+                rot_dir(t, x->pai);
+                w = x->pai->esq;
+            }
+            //Caso 2
+            if(w->dir->cor == BLACK && w->esq->cor == BLACK){
+                w->cor = RED;
+                x = x->pai;
+            }
+            //Caso 3
+            else{
+                if(w->esq->cor == BLACK){
+                    w->dir->cor = BLACK;
+                    w->cor = RED;
+                    rot_esq(t, w);
+                    w = x->pai->esq;
+                }
+                //Caso 4
+                w->cor = x->pai->cor;
+                x->pai->cor = BLACK;
+                w->esq->cor = BLACK;
+                rot_dir(t, x->pai);
+                x = t->root;
+            }
+        }
+    }
+    x->cor = BLACK;
+}
+
+void remover(struct tree_t *t, int chave){
+    struct no_t *z = busca(t->root, chave);
+    struct no_t *y, *x;
+    int cor;
+
+    /*Se não achar z*/
+    if(z == NULL){
+        return;
+    }
+
+    /**/
+    y = z;
+    cor = y->cor;
+    if(z->esq == NULL){
+        x = z->dir;
+        transplant(t, z, z->dir);
+    } else if (z->dir == NULL){
+        x = z->esq;
+        transplant(t, z, z->esq);
+    } else{
+        y = tree_max(z->esq); //Antecessor
+        x = y->dir;
+        if(y->pai == z){
+            x->pai = y;
+        } else{
+            transplant(t, y, y->dir);
+            y->dir = z->dir;
+            y->dir->pai = y;
+        }
+        transplant(t, z, y);
+        y->esq = z->esq;
+        y->esq->pai = y;
+        y->cor = z->cor;
+    }
+
+    /*Consertar*/
+    if(cor == BLACK){
+        remover_fixup(t, x);
+    }
+}
+
+void print_em_ordem_aux(struct no_t *r, int nivel){
     if(r == NULL) return;
 
-    print_em_ordem(r->esq);
-    printf("%d, %d \n", r->chave, r->cor);
-    //    printf("%d, %d, %d \n", r->chave, nivel,r->cor);
-    print_em_ordem(r->dir);
+    print_em_ordem_aux(r->esq, nivel+1);
+    printf("%d,%d,%d\n", r->chave, nivel, r->cor);
+    print_em_ordem_aux(r->dir, nivel+1);
 }
 
+
+void print_em_ordem(struct tree_t *t){
+    print_em_ordem_aux(t->root, 0);
+}
