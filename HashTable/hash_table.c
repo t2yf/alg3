@@ -25,7 +25,7 @@ int h2(int k){
     double tmp = k * 0.9 - floor(k * 0.9);
     return (int)(floor(m * tmp));
 }
-
+//TODO fazer search hash h1 e search hash h2
 int search_hash(struct hashTable *T, int k){
     int pos1 = h1(k);
 
@@ -48,21 +48,53 @@ int search_hash(struct hashTable *T, int k){
     return -1;
 }
 
+//TODO se pos1 estiver ocupado, pos2 também, o que fazer??
+//TODO resolver caso do 4, 15, 59 do teste1
 void insert_hash(struct hashTable *T, int k){
     int pos1 = h1(k);
+
+    printf("Inserir k = %d pos1 = %d\n", k, pos1);
+
     //Inserção em T1
     if(T->T1[pos1].state == EMPTY || T->T1[pos1].state == EXCLUDED){
+
+        printf("Inserir em h1\n");
+
         T->T1[pos1].k = k;
         T->T1[pos1].state = OCCUPIED;
     } else{
-        //Inserção em T2
+        //Inserção em T2 caso haja colisão em T1 
         int current_k = T->T1[pos1].k;
-        int pos2 = h2(k);
-        if(T->T2[pos2].state == EMPTY){
-            T->T1[pos1].k = k;
-            T->T2[pos2].k = current_k;
-            T->T2[pos2].state = OCCUPIED;
-        }   
+
+        //Se tiver chaves duplicadas ou seja se k == current_k, não faz nada
+        if(k != current_k){
+            int pos2 = h2(k);
+            if(T->T2[pos2].state == EMPTY){
+
+                printf("Inserir k %d em h2 pos2 = %d\n", k, pos2);
+
+                T->T2[pos2].k = current_k;
+                T->T2[pos2].state = OCCUPIED;
+
+                printf("state 5 %d\n", T->T2[pos2].state);
+
+                //T1 recebe o novo k
+                T->T1[pos1].k = k;
+                printf("Novo k %d pos1 %d\n", k, pos1);
+            } else {
+                // TODO NAO ESTAH ENTRANDO AQUI 
+                //Se pos2 estiver ocupado
+                pos2++;
+                T->T2[pos2].k = current_k;
+                T->T2[pos2].state = OCCUPIED;
+
+                printf("Inserir pos2 repetido k %d em h2 pos2 = %d\n", k, pos2);
+
+                //T1 recebe o novo k
+                T->T1[pos1].k = k;
+            }
+        }
+
     }
 
 }
@@ -71,13 +103,24 @@ void delete_hash(struct hashTable *T, int k){
     //TODO usar busca_hash e ver como diferenciar T1 e T2 
     //Se chave estiver em T2
     int pos2 = h2(k);
-    if(T->T2[pos2].k == k){
+
+    //printf("Delete k %d\n", k);
+    //printf("pos2 %d\n", pos2);
+
+    //printf("%d\n\n", T->T2[5].k);
+
+    //Considerar que pode estar um a frente
+    if(T->T2[pos2].k == k || T->T2[pos2++].k == k){
         //Deixar vazia quer dizer que pode reescrever
+
+       // printf("Delete h2 k %d pos2 %d\n", k, pos2);
+
         T->T2[pos2].state = EMPTY;
     }else{
         //Se chave estiver em T1
         int pos1 = h1(k);
         if(T->T1[pos1].k == k){
+            //printf("Delete h2 k %d pos1 %d\n", k, pos1);
             T->T1[pos1].state = EXCLUDED;
         }
     }
