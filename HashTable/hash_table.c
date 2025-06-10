@@ -50,7 +50,7 @@ int h2(int k){
 //     return -1;
 // }
 
-//TODO verificar se search está ok, pq se eu colocar T->T1..EXCLUDED dá errado
+//TODO verificar se search está ok
 int search_hash(struct hashTable *T, int k, int *pos){
     int pos1 = h1(k);
 
@@ -64,7 +64,7 @@ int search_hash(struct hashTable *T, int k, int *pos){
         *pos = pos1;
         return 1;
     } 
-    //Caso 3: pos1 em T1 estah excluida
+    //Caso 3: Chave estah em T2
     else{
         int pos2 = h2(k);
         if(T->T2[pos2].state == OCCUPIED && T->T2[pos2].k == k){
