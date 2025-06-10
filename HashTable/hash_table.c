@@ -143,7 +143,6 @@ void delete_hash(struct hashTable *T, int k){
 }
 
 
-
 void selectionSort(struct no_print **v, int tam)
 {
     int min;
@@ -197,6 +196,6 @@ void print_hash(struct hashTable *T){
     for(int i=0; i < count; i++){
         free(n[i]);
     }
-    free(n); 
+    free(n);
 }
 
