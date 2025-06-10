@@ -32,10 +32,9 @@ int main(int argc, char *argv[]){
         }
 
         print_hash(T);
-        
     }
 
-    destroy_table(T);
+    
 
     return 0;
 }
