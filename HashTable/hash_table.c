@@ -26,7 +26,32 @@ int h2(int k){
     return (int)(floor(m * tmp ));
 }
 //TODO fazer search hash h1 e search hash h2 ou ter alguma forma de verificar se o retorno eh de um ou de outro
-int search_hash(struct hashTable *T, int k){
+//Retorna em qual tabela está -1 nenhuma, 1 T1 e 2 T2
+//int search_hash(struct hashTable *T, int k, int *pos)
+// int search_hash(struct hashTable *T, int k){
+//     int pos1 = h1(k);
+
+//     //Caso 1: Chave nao estah em T1
+//     if(T->T1[pos1].state == EMPTY){
+//         return -1;
+//     }
+
+//     //Caso 2: Chave estah em T1 
+//     if(T->T1[pos1].state == OCCUPIED && T->T1[pos1].k == k){
+//         return pos1;
+//     } 
+//     //Caso 3: pos1 em T1 estah excluida
+//     else if(T->T1[pos1].state == EXCLUDED){
+//         int pos2 = h2(k);
+//         if(T->T2[pos2].state == OCCUPIED && T->T2[pos2].k == k){
+//             return pos2;
+//         }
+//     }
+//     return -1;
+// }
+
+//TODO verificar se search está ok, pq se eu colocar T->T1..EXCLUDED dá errado
+int search_hash(struct hashTable *T, int k, int *pos){
     int pos1 = h1(k);
 
     //Caso 1: Chave nao estah em T1
@@ -36,15 +61,18 @@ int search_hash(struct hashTable *T, int k){
 
     //Caso 2: Chave estah em T1 
     if(T->T1[pos1].state == OCCUPIED && T->T1[pos1].k == k){
-        return pos1;
+        *pos = pos1;
+        return 1;
     } 
     //Caso 3: pos1 em T1 estah excluida
-    else if(T->T1[pos1].state == EXCLUDED){
+    else{
         int pos2 = h2(k);
         if(T->T2[pos2].state == OCCUPIED && T->T2[pos2].k == k){
-            return pos2;
+            *pos = pos2;
+            return 2;
         }
     }
+
     return -1;
 }
 
@@ -77,25 +105,44 @@ void insert_hash(struct hashTable *T, int k){
 
 }
 
+// void delete_hash(struct hashTable *T, int k){
+//     //TODO usar busca_hash e ver como diferenciar T1 e T2 
+
+//     //Se chave estiver em T2
+//     int pos2 = h2(k);
+
+
+//     if(T->T2[pos2].state == OCCUPIED && T->T2[pos2].k == k) {
+//         //Deixar vazia quer dizer que pode reescrever
+//         T->T2[pos2].state = EMPTY;
+//     }else{
+//         //Se chave estiver em T1
+//         int pos1 = h1(k);
+//         if(T->T1[pos1].state == OCCUPIED && T->T1[pos1].k == k){
+//             //Marcar como excluído
+//             T->T1[pos1].state = EXCLUDED;
+//         }
+//     }
+// }
+
+
 void delete_hash(struct hashTable *T, int k){
-    //TODO usar busca_hash e ver como diferenciar T1 e T2 
+    int pos;
+    int table = search_hash(T, k, &pos);
 
-    //Se chave estiver em T2
-    int pos2 = h2(k);
-
-    //Considerar que pode estar um a frente|| T->T2[pos2++].k == k)
-    if(T->T2[pos2].state == OCCUPIED && T->T2[pos2].k == k) {
-        //Deixar vazia quer dizer que pode reescrever
-        T->T2[pos2].state = EMPTY;
-    }else{
-        //Se chave estiver em T1
-        int pos1 = h1(k);
-        if(T->T1[pos1].state == OCCUPIED && T->T1[pos1].k == k){
-            //Marcar como excluído
-            T->T1[pos1].state = EXCLUDED;
+    //Procurar em T2
+    if(table == 2){
+        if(T->T2[pos].state == OCCUPIED && T->T2[pos].k == k) {
+            T->T2[pos].state = EMPTY;
+        }
+    } else if(table == 1) {
+        if(T->T1[pos].state == OCCUPIED && T->T1[pos].k == k){
+            T->T1[pos].state = EXCLUDED;
         }
     }
 }
+
+
 
 void selectionSort(struct no_print **v, int tam)
 {

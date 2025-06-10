@@ -17,7 +17,7 @@ struct hashTable{
 int h1(int k);
 int h2(int k);
 void initialize_table(struct hashTable *T);
-int search_hash(struct hashTable *T, int k);
+int search_hash(struct hashTable *T, int k, int *pos);
 void insert_hash(struct hashTable *T, int k);
 void delete_hash(struct hashTable *T, int k);
 void print_hash(struct hashTable *T);
