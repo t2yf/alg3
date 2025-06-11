@@ -17,7 +17,7 @@ int main(int argc, char *argv[]){
             puts("login: ");
 
             puts("Nome: Thamiris Yamate Fischer ");
-            puts("GRR: 20243604");
+            puts("GRR: GRR20243604");
             puts("login: tyf24");
         }
     } else {
