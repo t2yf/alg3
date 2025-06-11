@@ -21,5 +21,6 @@ int search_hash(struct hashTable *T, int k, int *pos);
 void insert_hash(struct hashTable *T, int k);
 void delete_hash(struct hashTable *T, int k);
 void print_hash(struct hashTable *T);
+void *destroyTable(struct hashTable *T);
 
 #endif 

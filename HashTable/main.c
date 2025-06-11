@@ -16,9 +16,9 @@ int main(int argc, char *argv[]){
             puts("GRR: ");
             puts("login: ");
 
-            puts("Nome: ");
-            puts("GRR: ");
-            puts("login: ");
+            puts("Nome: Thamiris Yamate Fischer ");
+            puts("GRR: 20243604");
+            puts("login: tyf24");
         }
     } else {
         initialize_table(T);
@@ -32,9 +32,9 @@ int main(int argc, char *argv[]){
         }
 
         print_hash(T);
+        
     }
-
+    destroyTable(T);
     
-
     return 0;
 }

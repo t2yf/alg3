@@ -25,32 +25,7 @@ int h2(int k){
     double tmp = (k*0.9 - floor(k*0.9));
     return (int)(floor(m * tmp ));
 }
-//TODO fazer search hash h1 e search hash h2 ou ter alguma forma de verificar se o retorno eh de um ou de outro
-//Retorna em qual tabela está -1 nenhuma, 1 T1 e 2 T2
-//int search_hash(struct hashTable *T, int k, int *pos)
-// int search_hash(struct hashTable *T, int k){
-//     int pos1 = h1(k);
 
-//     //Caso 1: Chave nao estah em T1
-//     if(T->T1[pos1].state == EMPTY){
-//         return -1;
-//     }
-
-//     //Caso 2: Chave estah em T1 
-//     if(T->T1[pos1].state == OCCUPIED && T->T1[pos1].k == k){
-//         return pos1;
-//     } 
-//     //Caso 3: pos1 em T1 estah excluida
-//     else if(T->T1[pos1].state == EXCLUDED){
-//         int pos2 = h2(k);
-//         if(T->T2[pos2].state == OCCUPIED && T->T2[pos2].k == k){
-//             return pos2;
-//         }
-//     }
-//     return -1;
-// }
-
-//TODO verificar se search está ok
 int search_hash(struct hashTable *T, int k, int *pos){
     int pos1 = h1(k);
 
@@ -92,7 +67,7 @@ void insert_hash(struct hashTable *T, int k){
         if(k != current_k){
             //Colocar valor mais antigo em T2
             int pos2 = h2(current_k);
-            if(T->T2[pos2].state == EMPTY){
+            if(T->T2[pos2].state == EMPTY ){
                 T->T2[pos2].k = current_k;
                 T->T2[pos2].state = OCCUPIED;
 
@@ -100,30 +75,8 @@ void insert_hash(struct hashTable *T, int k){
                 T->T1[pos1].k = k;
             } 
         }
-
     }
-
 }
-
-// void delete_hash(struct hashTable *T, int k){
-//     //TODO usar busca_hash e ver como diferenciar T1 e T2 
-
-//     //Se chave estiver em T2
-//     int pos2 = h2(k);
-
-
-//     if(T->T2[pos2].state == OCCUPIED && T->T2[pos2].k == k) {
-//         //Deixar vazia quer dizer que pode reescrever
-//         T->T2[pos2].state = EMPTY;
-//     }else{
-//         //Se chave estiver em T1
-//         int pos1 = h1(k);
-//         if(T->T1[pos1].state == OCCUPIED && T->T1[pos1].k == k){
-//             //Marcar como excluído
-//             T->T1[pos1].state = EXCLUDED;
-//         }
-//     }
-// }
 
 
 void delete_hash(struct hashTable *T, int k){
@@ -143,59 +96,56 @@ void delete_hash(struct hashTable *T, int k){
 }
 
 
-void selectionSort(struct no_print **v, int tam)
+void selectionSort(struct no_print *v, int tam)
 {
     int min;
-    for(int i=0; i<tam-1; i++){
+    for(int i=0; i<tam -1; i++){
         min = i;
         for(int j=i+1; j<tam; j++){
-            if(v[j]->key < v[min]->key)
+            if(v[j].key < v[min].key)
                 min = j;
         }
         //Trocar structs de lugar
-        struct no_print *tmp = v[min];
+        struct no_print tmp = v[min];
         v[min] = v[i];
         v[i] = tmp;
     }
 }
 
 void print_hash(struct hashTable *T){
-    struct no_print **n;
-    n = malloc(2 * m * sizeof(struct no_print *)); 
-
+    struct no_print n[2*m];
+    
     int count = 0;
-    // Percorrer tabelas
+
+    //Preencher com valores das tabelas
     for(int i=0; i<m; i++){
-        // T1
         if(T->T1[i].state == OCCUPIED){
-            n[count] = malloc(sizeof(struct no_print));
-            n[count]->key = T->T1[i].k;
-            strcpy(n[count]->table, "T1");
-            n[count]->pos = i; 
+            n[count].key = T->T1[i].k;
+            strcpy(n[count].table, "T1");
+            n[count].pos = i;
             count++;
         }
-        // T2
         if(T->T2[i].state == OCCUPIED){
-            n[count] = malloc(sizeof(struct no_print));
-            n[count]->key = T->T2[i].k;
-            strcpy(n[count]->table, "T2");
-            n[count]->pos = i; 
+            n[count].key = T->T2[i].k;
+            strcpy(n[count].table, "T2");
+            n[count].pos = i;
             count++;
         }
     }
-
-    // Ordenar pela chave
+    
+    //Ordenar pela chave
     selectionSort(n, count);
 
-    // Imprimir
+    //Imprimir
     for(int i=0; i<count; i++){
-        printf("%d,%s,%d\n", n[i]->key, n[i]->table, n[i]->pos);
+        printf("%d,%s,%d\n", n[i].key, n[i].table, n[i].pos);
     }
-
-    // Liberar posições
-    for(int i=0; i < count; i++){
-        free(n[i]);
-    }
-    free(n);
 }
+
+void *destroyTable(struct hashTable *T){
+    free(T);
+    return NULL;
+}
+
+
 
